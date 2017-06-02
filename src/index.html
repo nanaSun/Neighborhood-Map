@@ -1,15 +1,77 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title></title>
-</head>
-<body>
-	<script src="http://maps.googleapis.com/maps/api/js?libraries=places&key=[YOUR_API_KEY]"></script>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      function initMap() {
+      	var pyrmont = {lat: 33.1262476, lng: -117.3115765};
+    	var map = new google.maps.Map(document.getElementById('map'), {
+          center:pyrmont,
+          zoom:15
+        });
+        infowindow = new google.maps.InfoWindow();
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch({
+          location: pyrmont,
+          radius: 1
+        }, callback);
+              function callback(results, status) {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+          for (var i = 0; i < results.length; i++) {
+            createMarker(results[i]);
+          }
+        }
+      }
+
+      function createMarker(place) {
+        var placeLoc = place.geometry.location;
+        var marker = new google.maps.Marker({
+          map: map,
+          position: place.geometry.location
+        });
+
+        google.maps.event.addListener(marker, 'click', function() {
+        	console.log(place);
+          infowindow.setContent(place.name);
+          infowindow.open(map, this);
+        });
+      }
+      }
+
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&libraries=places"
+    async defer></script>
+    <!--
+    https://maps.googleapis.com/maps/api/geocode/json?latlng=33.1262476,-117.3115765&key=
+    -->
+    <!--
+    https://maps.googleapis.com/maps/api/distancematrix/json?mode=bicycling&origins=4800+El+Camino+Real|Los+Altos|CA&destinations=2465+Lathem+Streat|Mountain+View|CA&key=
+    -->
 	<!-- build:js /js/jquery.min.js -->
  	<script src="/jquery/dist/jquery.js"></script>
  	<!-- endbuild -->
 	<!-- build:js /js/knockout.min.js -->
  	<script src="/knockout/dist/knockout.js"></script>
  	<!-- endbuild -->
-</body>
+
+ 	<script src="/scripts/app.js"></script>
+  </body>
 </html>
