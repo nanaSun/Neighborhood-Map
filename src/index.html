@@ -5,73 +5,47 @@
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
     <style>
-      /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-      #map {
+      html,
+      body {
+        font-family: Arial, sans-serif;
         height: 100%;
-      }
-      /* Optional: Makes the sample page fill the window. */
-      html, body {
-        height: 100%;
+        width: 100%;
         margin: 0;
         padding: 0;
       }
+      .side-bar{
+      	position: absolute;
+        background: #eee;
+        width: 320px;
+        height: 100%;
+        top:0px;
+        left: 0px;
+        z-index: 2;
+      }
+      .side-bar h1,.side-bar .searh-list{padding: 10px;}
+      #toggle-menu{width: 44px;height: 44px;}
+      #map {bottom:0px;height: 100%;width: 100%;position: absolute;right: 0px;z-index: 1; }
     </style>
   </head>
   <body>
+    <div data-bind="attr:{class: showMenu() ?'side-bar':'side-bar hide-menu'}">
+      <div class="wrapper">
+        <h1>BART Locations</h1>
+        <div class="searh-box">
+        	<div><input data-bind="textInput: searchWord" /></div>
+        	<div>Filter</div>
+        </div>
+        <div class="searh-list" bind-data="text: searchList">
+        </div>
+      </div>
+      <div id="toggle-menu" data-bind="click: toggleMenu">==</div>
+    </div>
     <div id="map"></div>
-    <script>
-      function initMap() {
-      	var pyrmont = {lat: 33.1262476, lng: -117.3115765};
-    	var map = new google.maps.Map(document.getElementById('map'), {
-          center:pyrmont,
-          zoom:15
-        });
-        infowindow = new google.maps.InfoWindow();
-        var service = new google.maps.places.PlacesService(map);
-        service.nearbySearch({
-          location: pyrmont,
-          radius: 1
-        }, callback);
-              function callback(results, status) {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-          for (var i = 0; i < results.length; i++) {
-            createMarker(results[i]);
-          }
-        }
-      }
-
-      function createMarker(place) {
-        var placeLoc = place.geometry.location;
-        var marker = new google.maps.Marker({
-          map: map,
-          position: place.geometry.location
-        });
-
-        google.maps.event.addListener(marker, 'click', function() {
-        	console.log(place);
-          infowindow.setContent(place.name);
-          infowindow.open(map, this);
-        });
-      }
-      }
-
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&libraries=places"
-    async defer></script>
-    <!--
-    https://maps.googleapis.com/maps/api/geocode/json?latlng=33.1262476,-117.3115765&key=
-    -->
-    <!--
-    https://maps.googleapis.com/maps/api/distancematrix/json?mode=bicycling&origins=4800+El+Camino+Real|Los+Altos|CA&destinations=2465+Lathem+Streat|Mountain+View|CA&key=
-    -->
-	<!-- build:js /js/jquery.min.js -->
- 	<script src="/jquery/dist/jquery.js"></script>
- 	<!-- endbuild -->
 	<!-- build:js /js/knockout.min.js -->
  	<script src="/knockout/dist/knockout.js"></script>
  	<!-- endbuild -->
-
  	<script src="/scripts/app.js"></script>
+ 	<script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&libraries=places&key="
+    async defer></script>
   </body>
 </html>

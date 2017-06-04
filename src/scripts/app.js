@@ -1,43 +1,46 @@
-// Class to represent a row in the seat reservations grid
-function SeatReservation(name, initialMeal) {
-    var self = this;
-    self.name = name;
-    self.meal = ko.observable(initialMeal);
- 	self.formattedPrice = ko.computed(function() {
-        var price = self.meal().price;
-        return price ? "$" + price.toFixed(2) : "None";        
+var map;
+var centerPoint={lat: 37.7749088,lng:-122.4894555};
+var markers = [];
+var service;
+var request;
+function initMap() {
+
+    map = new google.maps.Map(document.getElementById('map'), {
+      center:centerPoint,
+      zoom:10
     });
-
-}
-
-// Overall viewmodel for this screen, along with initial state
-function ReservationsViewModel() {
-    var self = this;
-
-    // Non-editable catalog data - would come from the server
-    self.availableMeals = [
-        { mealName: "Standard (sandwich)", price: 0 },
-        { mealName: "Premium (lobster)", price: 34.95 },
-        { mealName: "Ultimate (whole zebra)", price: 290 }
-    ];    
-
-    // Editable data
-    self.seats = ko.observableArray([
-        new SeatReservation("Steve", self.availableMeals[0]),
-        new SeatReservation("Bert", self.availableMeals[1]),
-        new SeatReservation("Bert", self.availableMeals[2]),
-        new SeatReservation("Bert", self.availableMeals[1])
-    ]);
-    self.addSeat = function() {
-        self.seats.push(new SeatReservation("aaa", self.availableMeals[0]));
+    markers.push(new google.maps.Marker({
+        map: map,
+        draggable: true,
+        position: centerPoint
+    }));
+    request = {
+        location: map.getCenter(),
+        radius: '500',
+        query: ''
+    };
+    
+    function MapViewModel() {
+        var _=this;
+        //toggle menu function use true and false to control the menu style
+        _.showMenu = ko.observable(false);
+        _.searchWord= ko.observable("");
+        _.toggleMenu = function(){
+            _.showMenu(!this.showMenu());
+        }
+        _.searchList =  ko.computed(function() {
+            console.log(_.searchWord());
+            if(_.searchWord()==="") return [];
+            request.query=_.searchWord();
+            service = new google.maps.places.PlacesService(map);
+            service.textSearch(request, function(results, status){
+                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                    console.log(results);
+                }
+            });
+        }, _);
     }
-    self.removeSeat = function(seat) { self.seats.remove(seat) }
-    self.totalSurcharge = ko.computed(function() {
-	   var total = 0;
-	   for (var i = 0; i < self.seats().length; i++)
-	       total += self.seats()[i].meal().price;
-	   return total;
-	});
+    ko.applyBindings(new MapViewModel());
 }
 
-ko.applyBindings(new ReservationsViewModel());
+
