@@ -40,7 +40,7 @@ function initMap() {
                 toggleBounce(self.marker);
                 infoWindow.setContent(self.name+"<br/>"+self.formatted_address);
                 infoWindow.open(map, self.marker);
-            },1000);
+            },500);
         }
         google.maps.event.addListener(self.marker, 'click', self.showDetail);
         self.clear=function(){
@@ -67,7 +67,7 @@ function initMap() {
     function MapViewModel() {
         var _=this;
         //toggle menu function use true and false to control the menu style
-        _.showMenu = ko.observable(false);
+        _.showMenu = ko.observable(true);
         _.searchWord= ko.observable("");
         _.searchItems=ko.observableArray([]);
         _.toggleMenu = function(){

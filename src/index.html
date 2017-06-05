@@ -5,26 +5,24 @@
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
     <style>
-      html,
-      body {
-        font-family: Arial, sans-serif;
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      .side-bar{
-      	position: absolute;
-        background: #eee;
-        width: 320px;
-        height: 100%;
-        top:0px;
-        left: 0px;
-        z-index: 2;
-      }
-      .side-bar h1,.side-bar .searh-list{padding: 10px;}
-      #toggle-menu{width: 44px;height: 44px;}
-      #map {bottom:0px;height: 100%;width: 100%;position: absolute;right: 0px;z-index: 1; }
+		html,body {font-family: Arial, sans-serif;height: 100%;width: 100%;margin: 0;padding: 0;font-size: 16px;}
+		.side-bar{position: absolute;background: #333;width: 80%;max-width: 320px;height: 100%;top:0px;left: 0px;z-index: 2; transition: -webkit-transition-duration:1s; transition-duration:1s; will-change:transform;color:#fff;}
+		.hide-menu{ -webkit-transform: translateX(-100%); transform: translateX(-100%); }
+		#toggle-menu:after{position: absolute;content: "";width: 0px;height: 0px;border-width:6px 6px  6px 0;border-color: transparent #030310 transparent transparent ;border-style: solid;top: 17px;left: 8px; -webkit-transition-duration:1s; transition-duration:1s; will-change:transform; }
+		.hide-menu #toggle-menu:after{ -webkit-transform: scaleX(-1);transform: scaleX(-1); }
+		#toggle-menu{width: 22px;height: 44px;position: absolute;right: -22px;background: #eee; top: 54px;border-left: 1px solid #ddd;box-shadow: 0px 1px 4px rgba(0,0,0,0.3);} 
+		.searh-box{width: 100%;display: -webkit-box; display: -moz-box;       display: -ms-flexbox; display: -webkit-flex;   display: flex;}
+		.side-bar h1,.side-bar .searh-list{padding: 10px;}
+		.side-bar h1{ font-size: 18px; margin:0px;  }
+
+
+		.searh-box div{ margin:0px; padding: 0px;display: inline-block; height: 2em; line-height: 2em; background: #fff; }
+		.searh-box div:first-child{ width: 80%;}
+		.searh-box div:first-child input{ width: 80%; padding: 0px 5%;  background: #fff;  border: none;outline: none; }
+		.item-list{ line-height: 2; font-size: 14px; cursor: pointer; }
+		.searh-box div:last-child{ width: 20%; text-align: center; background: blue;}
+		
+		#map {bottom:0px;height: 100%;width: 100%;position: absolute;right: 0px;z-index: 1; }
     </style>
   </head>
   <body>
@@ -32,20 +30,22 @@
       <div class="wrapper">
         <h1>BART Locations</h1>
         <div class="searh-box">
-        	<div><input data-bind="textInput: searchWord" /></div>
+        	<div><input data-bind="textInput: searchWord" placeholder="Station Locations" /></div>
         	<div>Filter</div>
         </div>
         <div class="searh-list" data-bind="foreach: searchItems ">
             <div class="item-list" data-bind="click: $data.showDetail,text: $data.name"></div>
         </div>
       </div>
-      <div id="toggle-menu" data-bind="click: toggleMenu">==</div>
+      <div id="toggle-menu" data-bind="click: toggleMenu"></div>
     </div>
     <div id="map"></div>
 	<!-- build:js /js/knockout.min.js -->
  	<script src="/knockout/dist/knockout.js"></script>
  	<!-- endbuild -->
+ 	<!-- build:js /js/main.min.js -->
  	<script src="/scripts/app.js"></script>
+ 	<!-- endbuild -->
  	<script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&libraries=places&key="
     async defer></script>
   </body>
