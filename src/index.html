@@ -35,13 +35,15 @@
         	<div><input data-bind="textInput: searchWord" /></div>
         	<div>Filter</div>
         </div>
-        <div class="searh-list" bind-data="text: searchList">
+        <div class="searh-list" data-bind="foreach: searchItems">
+            <div class="item-list" data-bind="text: name"></div>
         </div>
       </div>
       <div id="toggle-menu" data-bind="click: toggleMenu">==</div>
     </div>
     <div id="map"></div>
 	<!-- build:js /js/knockout.min.js -->
+  <script src="/jquery/dist/jquery.js"></script>
  	<script src="/knockout/dist/knockout.js"></script>
  	<!-- endbuild -->
  	<script src="/scripts/app.js"></script>
