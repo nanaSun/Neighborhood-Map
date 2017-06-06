@@ -4,17 +4,30 @@ var places=[];
 var infoWindow;
 var service;
 var request;
+var isSearching=false;
+var limits={
+	place:"San Francisco",
+	type:"store"
+};
+var searchType=["store","","","","",""];
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
       center:centerPoint,
-      zoom:10
+      zoom:13,
+      zoomControl: true,
+	  mapTypeControl: false,
+	  scaleControl: true,
+	  streetViewControl: true,
+	  rotateControl: true,
+	  fullscreenControl: false
     });
     infoWindow = new google.maps.InfoWindow();
     service = new google.maps.places.PlacesService(map);
     request = {
         location: map.getCenter(),
-        radius: '500',
-        query: ''
+        query: '',
+        radius:'1000',
+        types: []
     };
     function toggleBounce(marker) {
         if (marker.getAnimation() !== null) {
@@ -24,6 +37,7 @@ function initMap() {
         }
       }
     function place(data,map) {
+    	console.log(data);
         var self = this;
         self.formatted_address = data.formatted_address;
         self.name = data.name;
@@ -48,6 +62,7 @@ function initMap() {
         }
     }
     function searchPlace(request,_,map){
+    	console.log(request)
         service = new google.maps.places.PlacesService(map);
         service.textSearch(request, function(results, status){
             if (status == google.maps.places.PlacesServiceStatus.OK) {
@@ -82,7 +97,10 @@ function initMap() {
                 i.clear();
             })
             if(_.searchWord()==="") { _.searchItems([]);}
-            else{request.query=_.searchWord();searchPlace(request,_,map);}
+            else{
+            	request.types=[limits.type];
+            	request.query=_.searchWord()+"|"+limits.place;searchPlace(request,_,map);
+            }
         });
     }
     ko.applyBindings(new MapViewModel());
