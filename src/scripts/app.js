@@ -5,11 +5,6 @@ var infoWindow;
 var service;
 var request;
 var isSearching=false;
-var limits={
-	place:"San Francisco",
-	type:"store"
-};
-var searchType=["store","","","","",""];
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
       center:centerPoint,
@@ -25,7 +20,6 @@ function initMap() {
     service = new google.maps.places.PlacesService(map);
     request = {
         location: map.getCenter(),
-        query: '',
         radius:'1000',
         types: []
     };
@@ -68,9 +62,6 @@ function initMap() {
             if (status == google.maps.places.PlacesServiceStatus.OK) {
                 places=results.map(function(i,index){
                     var tmp=new place(i,map);
-                    setTimeout(function(){
-                        tmp.marker.setAnimation(google.maps.Animation.DROP);
-                    },index*200);
                     return tmp;
                 })
                 _.searchItems(places);
@@ -83,23 +74,30 @@ function initMap() {
         var _=this;
         //toggle menu function use true and false to control the menu style
         _.showMenu = ko.observable(true);
+        _.showChooseType = ko.observable(false);
+        _.typeItems=ko.observableArray(["store","bar","bank","hospital","atm"]);
         _.searchWord= ko.observable("");
         _.searchItems=ko.observableArray([]);
+        _.type=ko.observable("store");
+        _.mainplace=ko.observable("San Francisco");
         _.toggleMenu = function(){
             _.showMenu(!this.showMenu());
         }
-        _.popToPosition=function(item){
-            console.log(item);
-        };
-
+        _.chooseType=function(data){
+        	_.type(data);
+        }
+        _.toggleChooseType=function(){
+        	_.showChooseType(!this.showChooseType());
+        }
         ko.computed(function(){
             places.forEach(function(i){
                 i.clear();
             })
-            if(_.searchWord()==="") { _.searchItems([]);}
-            else{
-            	request.types=[limits.type];
-            	request.query=_.searchWord()+"|"+limits.place;searchPlace(request,_,map);
+            if(_.searchWord()==="") { 
+            	request.types=_.typeItems();searchPlace(request,_,map);
+            }else{
+            	request.types=[_.type()];
+            	request.query=_.searchWord()+"|"+_.mainplace();searchPlace(request,_,map);
             }
         });
     }
