@@ -23,32 +23,33 @@ function initMap() {
         radius:'1000',
         types: []
     };
-    function toggleBounce(marker) {
-        if (marker.getAnimation() !== null) {
-          marker.setAnimation(null);
-        } else {
-          marker.setAnimation(google.maps.Animation.BOUNCE);
+    function markerBounce(marker) {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function(){
+            marker.setAnimation(null);
+        },1400);
+    }
+    function infoPanel(data){
+        if(typeof data.photos!=="undefined"&&data.photos.length>0){return '<img src="'+data.photos[0].getUrl({'maxWidth': 120})+'"/>'+data.name+"<br/>"+data.formatted_address+"<br/>";}
+        else{
+            return data.name+"<br/>"+data.formatted_address+"<br/>";
         }
-      }
+        
+    }
     function place(data,map) {
-    	console.log(data);
         var self = this;
-        self.formatted_address = data.formatted_address;
-        self.name = data.name;
-        self.place_id = data.place_id;
-        self.geometry = data.geometry.location;
+        self.data=data;
         self.marker = new google.maps.Marker({
             map: map,
-            position: self.geometry
+            position: data.geometry.location
         });
         self.showDetail=function(){
+            map.setCenter(self.data.geometry.location);
+            map.setZoom(15);
             infoWindow.close() 
-            toggleBounce(self.marker);
-            setTimeout(function() {
-                toggleBounce(self.marker);
-                infoWindow.setContent(self.name+"<br/>"+self.formatted_address);
-                infoWindow.open(map, self.marker);
-            },500);
+            markerBounce(self.marker);
+            infoWindow.setContent(infoPanel(self.data));
+            infoWindow.open(map, self.marker);
         }
         google.maps.event.addListener(self.marker, 'click', self.showDetail);
         self.clear=function(){
@@ -56,7 +57,6 @@ function initMap() {
         }
     }
     function searchPlace(request,_,map){
-    	console.log(request)
         service = new google.maps.places.PlacesService(map);
         service.textSearch(request, function(results, status){
             if (status == google.maps.places.PlacesServiceStatus.OK) {
@@ -92,7 +92,9 @@ function initMap() {
         ko.computed(function(){
             places.forEach(function(i){
                 i.clear();
-            })
+            });
+            map.setCenter(centerPoint);
+            map.setZoom(13);
             if(_.searchWord()==="") { 
             	request.types=_.typeItems();searchPlace(request,_,map);
             }else{
