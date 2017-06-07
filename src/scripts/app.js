@@ -40,7 +40,7 @@ function initMap() {
 
     //place detail window
     function infoPanel(data){
-
+        
         if(typeof data.photos!=="undefined"&&data.photos.length>0){
             return '<img src="'+data.photos[0].getUrl({'maxWidth': 120})+'"/><br/>'+data.name+"<br/>"+data.formatted_address+"<br/>";}
         else{
@@ -67,19 +67,29 @@ function initMap() {
                     console.error(status);
                     return;
                 }
+                console.log(_.data);
                 infoWindow.setContent(infoPanel(_.data));
                 infoWindow.open(map, _.marker);
             });
-            $.ajax( {
-                url: "https://jp.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles="+_.data.name,
-                dataType: 'jsonp',
-                type: 'GET',
-                headers: { 'Api-User-Agent': 'Example/1.0' },
-                success: function(data) {
-                   console.log(data.query.pages['2455254'].revisions[0]['*']);
-                    infoWindow.setContent(infoPanel(data.query.pages['2455254'].revisions[0]['*']));
-                }
-            } );
+            //https://www.yelp.com/developers/documentation/v3/business_reviews
+            //http://samples.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=b1b15e88fa797225412429c1c50c122a1
+            // $.ajax( {
+            //     url: "https://jp.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles="+_.data.name,
+            //     dataType: 'jsonp',
+            //     type: 'GET',
+            //     headers: { 'Api-User-Agent': 'Example/1.0' },
+            //     success: function(data) {
+            //        console.log();
+            //        for(var i in data.query.pages){
+            //             if(i==-1){
+                           
+            //             }else{
+            //                 infoWindow.setContent(infoPanel(data.query.pages[i].revisions[0]['*']));
+            //             }
+            //             break;
+            //        }
+            //     }
+            // } );
             // infoWindow.setContent(infoPanel(_.data));
             // infoWindow.open(map, _.marker);
         };
@@ -137,7 +147,6 @@ function initMap() {
         _.searchWord= ko.observable("");
         _.searchItems=ko.observableArray([]);
         _.type=ko.observable("store");
-        _.mainplace=ko.observable("San Francisco");
         _.toggleMenu = function(){
             _.showMenu(!this.showMenu());
         };
@@ -158,7 +167,7 @@ function initMap() {
             	request.types=_.typeItems();searchNearByPlace(request,_,map);
             }else{
             	request.types=[_.type()];
-            	request.query=_.searchWord()+"|"+_.mainplace();searchPlace(request,_,map);
+            	request.query=_.searchWord();searchPlace(request,_,map);
             }
         });
     }
