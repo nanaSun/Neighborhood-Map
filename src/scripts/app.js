@@ -40,7 +40,8 @@ function initMap() {
 
     //place detail window
     function infoPanel(data){
-        if(typeof data.photos!=="undefined"&&data.photos.length>0){return '<img src="'+data.photos[0].getUrl({'maxWidth': 120})+'"/>'+data.name+"<br/>"+data.formatted_address+"<br/>";}
+        if(typeof data.photos!=="undefined"&&data.photos.length>0){
+            return '<img src="'+data.photos[0].getUrl({'maxWidth': 120})+'"/><br/>'+data.name+"<br/>"+data.formatted_address+"<br/>";}
         else{
             return data.name+"<br/>"+data.formatted_address+"<br/>";
         }
@@ -59,23 +60,23 @@ function initMap() {
         _.showDetail=function(){
             map.setCenter(_.data.geometry.location);
             map.setZoom(15);
-            infoWindow.close() 
+            infoWindow.close();
             
             infoWindow.setContent(infoPanel(_.data));
             infoWindow.open(map, _.marker);
-        }
+        };
 
          //show info with animation
         _.clickMarkerDetail=function(){
             markerBounce(_.marker);
             _.showDetail();
-        }
+        };
         google.maps.event.addListener(_.marker, 'click', _.clickMarkerDetail);
 
         //clear marker on the map
         _.clear=function(){
             _.marker.setMap(null);
-        }
+        };
     }
 
     //search place service
@@ -85,7 +86,7 @@ function initMap() {
                 places=results.map(function(i,index){
                     var tmp=new place(i,map);
                     return tmp;
-                })
+                });
                 _.searchItems(places);
             }else{
                 _.searchItems([]);
@@ -106,14 +107,15 @@ function initMap() {
         _.mainplace=ko.observable("San Francisco");
         _.toggleMenu = function(){
             _.showMenu(!this.showMenu());
-        }
+        };
         _.chooseType=function(data){
         	_.type(data);
-        }
+        };
         _.toggleChooseType=function(){
         	_.showChooseType(!this.showChooseType());
-        }
+        };
         ko.computed(function(){
+            _.searchItems([]);
             places.forEach(function(i){
                 i.clear();
             });

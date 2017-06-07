@@ -19,7 +19,7 @@ gulp.task('bower', function() {
 });
 
 gulp.task('check', function() {
-    return gulp.src('./src/scripts/*.js')
+    return gulp.src(['./src/scripts/*.js','./dist/scripts/*.js'])
     .pipe(jshint())
     .pipe(jshint.reporter('default'));
 });
