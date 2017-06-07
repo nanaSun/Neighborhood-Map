@@ -21,15 +21,16 @@
 	    </div>
         <div class="list-box">
 	        <div class="search-list" data-bind="foreach: searchItems ">
-	            <div class="item-list" data-bind="click: $data.showDetail,text: $data.data.name"></div>
+	            <div class="item-list" data-bind="click: $data.clickMarkerDetail,text: $data.data.name"></div>
 	        </div>
 	     </div>
       </div>
       <div id="toggle-menu" data-bind="click: toggleMenu"></div>
     </div>
     <div id="map"></div>
-	<!-- build:js /scripts/knockout.min.js -->
+	<!-- build:js /scripts/tool.min.js -->
  	<script src="/knockout/dist/knockout.js"></script>
+  <script src="/jquery/dist/jquery.js"></script>
  	<!-- endbuild -->
  	<script src="/scripts/app.js"></script>
  	<script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&libraries=places&key="

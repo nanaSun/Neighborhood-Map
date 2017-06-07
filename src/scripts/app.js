@@ -1,5 +1,5 @@
 var map,
-	centerPoint={lat: 37.7749088,lng:-122.4894555},//initial center point
+	centerPoint={lat: 35.0153,lng:135.7682},//initial center point
 	places=[],
 	infoWindow,
 	service,
@@ -26,7 +26,7 @@ function initMap() {
     //search init params
     request = {
         location: map.getCenter(),
-        radius:'1000',
+        radius:'5000',
         types: []
     };
 
@@ -40,6 +40,7 @@ function initMap() {
 
     //place detail window
     function infoPanel(data){
+
         if(typeof data.photos!=="undefined"&&data.photos.length>0){
             return '<img src="'+data.photos[0].getUrl({'maxWidth': 120})+'"/><br/>'+data.name+"<br/>"+data.formatted_address+"<br/>";}
         else{
@@ -61,9 +62,26 @@ function initMap() {
             map.setCenter(_.data.geometry.location);
             map.setZoom(15);
             infoWindow.close();
-            
-            infoWindow.setContent(infoPanel(_.data));
-            infoWindow.open(map, _.marker);
+            service.getDetails(_.data, function(result, status) {
+                if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                    console.error(status);
+                    return;
+                }
+                infoWindow.setContent(infoPanel(_.data));
+                infoWindow.open(map, _.marker);
+            });
+            $.ajax( {
+                url: "https://jp.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles="+_.data.name,
+                dataType: 'jsonp',
+                type: 'GET',
+                headers: { 'Api-User-Agent': 'Example/1.0' },
+                success: function(data) {
+                   console.log(data.query.pages['2455254'].revisions[0]['*']);
+                    infoWindow.setContent(infoPanel(data.query.pages['2455254'].revisions[0]['*']));
+                }
+            } );
+            // infoWindow.setContent(infoPanel(_.data));
+            // infoWindow.open(map, _.marker);
         };
 
          //show info with animation
@@ -93,6 +111,21 @@ function initMap() {
             }
         });
     }
+    //search place service
+    function searchNearByPlace(request,_,map){
+        service.nearbySearch(request, function(results, status){
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+                places=results.map(function(i,index){
+                    var tmp=new place(i,map);
+                    return tmp;
+                });
+                _.searchItems(places);
+            }else{
+                _.searchItems([]);
+            }
+        });
+    }
+
 
     //main model function
     function MapViewModel() {
@@ -122,7 +155,7 @@ function initMap() {
             map.setCenter(centerPoint);
             map.setZoom(13);
             if(_.searchWord()==="") { 
-            	request.types=[_.type()];searchPlace(request,_,map);
+            	request.types=_.typeItems();searchNearByPlace(request,_,map);
             }else{
             	request.types=[_.type()];
             	request.query=_.searchWord()+"|"+_.mainplace();searchPlace(request,_,map);
