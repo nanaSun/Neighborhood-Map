@@ -28,5 +28,8 @@
     "gulp-usemin": "^0.3.28",
     "html-minifier": "^3.5.2",
     "jshint": "^2.9.4"
+  },
+  "dependencies": {
+    "yelp-fusion": "^1.0.3"
   }
 }
