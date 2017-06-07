@@ -1,11 +1,13 @@
-var map;
-var centerPoint={lat: 37.7749088,lng:-122.4894555};
-var places=[];
-var infoWindow;
-var service;
-var request;
-var isSearching=false;
+var map,
+	centerPoint={lat: 37.7749088,lng:-122.4894555},//initial center point
+	places=[],
+	infoWindow,
+	service,
+	request,
+	isSearching=false;
+//after google map api loaded, run this function
 function initMap() {
+	//init map
     map = new google.maps.Map(document.getElementById('map'), {
       center:centerPoint,
       zoom:13,
@@ -16,19 +18,27 @@ function initMap() {
 	  rotateControl: true,
 	  fullscreenControl: false
     });
+    //init infoWindow
     infoWindow = new google.maps.InfoWindow();
+    //init service
     service = new google.maps.places.PlacesService(map);
+
+    //search init params
     request = {
         location: map.getCenter(),
         radius:'1000',
         types: []
     };
+
+    //marker animation
     function markerBounce(marker) {
         marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function(){
             marker.setAnimation(null);
         },1400);
     }
+
+    //place detail window
     function infoPanel(data){
         if(typeof data.photos!=="undefined"&&data.photos.length>0){return '<img src="'+data.photos[0].getUrl({'maxWidth': 120})+'"/>'+data.name+"<br/>"+data.formatted_address+"<br/>";}
         else{
@@ -36,28 +46,40 @@ function initMap() {
         }
         
     }
+
+    //each place function
     function place(data,map) {
-        var self = this;
-        self.data=data;
-        self.marker = new google.maps.Marker({
+        var _ = this;
+        _.data=data;
+        _.marker = new google.maps.Marker({
             map: map,
             position: data.geometry.location
         });
-        self.showDetail=function(){
-            map.setCenter(self.data.geometry.location);
+
+        _.showDetail=function(){
+            map.setCenter(_.data.geometry.location);
             map.setZoom(15);
             infoWindow.close() 
-            markerBounce(self.marker);
-            infoWindow.setContent(infoPanel(self.data));
-            infoWindow.open(map, self.marker);
+            
+            infoWindow.setContent(infoPanel(_.data));
+            infoWindow.open(map, _.marker);
         }
-        google.maps.event.addListener(self.marker, 'click', self.showDetail);
-        self.clear=function(){
-            self.marker.setMap(null);
+
+         //show info with animation
+        _.clickMarkerDetail=function(){
+            markerBounce(_.marker);
+            _.showDetail();
+        }
+        google.maps.event.addListener(_.marker, 'click', _.clickMarkerDetail);
+
+        //clear marker on the map
+        _.clear=function(){
+            _.marker.setMap(null);
         }
     }
+
+    //search place service
     function searchPlace(request,_,map){
-        service = new google.maps.places.PlacesService(map);
         service.textSearch(request, function(results, status){
             if (status == google.maps.places.PlacesServiceStatus.OK) {
                 places=results.map(function(i,index){
@@ -70,6 +92,8 @@ function initMap() {
             }
         });
     }
+
+    //main model function
     function MapViewModel() {
         var _=this;
         //toggle menu function use true and false to control the menu style
@@ -96,13 +120,15 @@ function initMap() {
             map.setCenter(centerPoint);
             map.setZoom(13);
             if(_.searchWord()==="") { 
-            	request.types=_.typeItems();searchPlace(request,_,map);
+            	request.types=[_.type()];searchPlace(request,_,map);
             }else{
             	request.types=[_.type()];
             	request.query=_.searchWord()+"|"+_.mainplace();searchPlace(request,_,map);
             }
         });
     }
+
+    //bind with view
     ko.applyBindings(new MapViewModel());
 }
 
