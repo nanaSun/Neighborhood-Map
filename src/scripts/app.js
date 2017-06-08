@@ -4,13 +4,13 @@ var map,
 	infoWindow,
 	service,
 	request,
-	isSearching=false;
+    init=false;
 //after google map api loaded, run this function
 function initMap() {
 	//init map
     map = new google.maps.Map(document.getElementById('map'), {
       center:centerPoint,
-      zoom:10,
+      zoom:13,
       zoomControl: true,
 	  mapTypeControl: false,
 	  scaleControl: true,
@@ -33,7 +33,7 @@ function initMap() {
 
     //place detail window
     function infoPanel(data){
-            return data.name+"<br/>"+data.location.display_address.join(",")+"<br/>";
+        return "<img src='"+data.image_url+"' width='40px'/>"+"<br/>"+(!data.isclose?"opening":"closed")+"<br/>"+"phone: " +data.phone+"<br/>"+data.name+"<br/>"+data.location.display_address.join(",")+"<br/>";
     }
 
     //each place function
@@ -44,14 +44,10 @@ function initMap() {
             map: map,
             position: new google.maps.LatLng(_.data.coordinates.latitude, _.data.coordinates.longitude)
         });
-        _.marker.setMap(map);
-        
-        console.log(_.marker);
         _.showDetail=function(){
             map.setCenter(new google.maps.LatLng(_.data.coordinates.latitude, _.data.coordinates.longitude));
             map.setZoom(15);
             infoWindow.close();
-            console.log(_.data);
             infoWindow.setContent(infoPanel(_.data));
             infoWindow.open(map, _.marker);
         };
@@ -67,6 +63,10 @@ function initMap() {
         _.clear=function(){
             _.marker.setMap(null);
         };
+        _.show=function(){
+            _.marker.setMap(map);
+        };
+        _.show();
     }
 
     //search place service
@@ -88,17 +88,16 @@ function initMap() {
         });
     }
 
+    //filter item
+    function filterPlace(items,filterWord){
+
+    }
 
     //main model function
     function MapViewModel() {
         var _=this;
-        var searchajax=null;
         //toggle menu function use true and false to control the menu style
         _.showMenu = ko.observable(true);
-        //toggle filter div
-        _.showChooseType = ko.observable(false);
-        //filter item
-        _.typeItems=ko.observableArray(["store","bar","bank","hospital","atm"]);
         //search keyword
         _.searchWord= ko.observable("");
 
@@ -111,47 +110,42 @@ function initMap() {
         _.toggleMenu = function(){
             _.showMenu(!this.showMenu());
         };
-        _.chooseType=function(data){
-        	_.type(data);
+
+        //init data
+        request = {
+            "action":"s",
+            "location": "San fransaco",
+            "limit": 50
         };
-        _.toggleChooseType=function(){
-        	_.showChooseType(!this.showChooseType());
-        };
-        ko.computed(function(){
-            if(searchajax!==null) searchajax.abort();
-            _.searchItems([]);
-            places.forEach(function(i){
-                i.clear();
+        searchPlace(request,function(data){
+            init=true;
+            places=data.businesses.map(function(i){
+                return new place(i,map);
             });
-            map.setCenter(centerPoint);
-            map.setZoom(13);
-            if(_.searchWord()==="") { 
-                request = {
-                    "action":"s",
-                    "location": "San fransaco",
-                    "limit": 10
-                };
-            	searchajax=searchPlace(request,function(data){
-                    places=data.businesses.map(function(i){
-                        return new place(i,map);
+
+            //init filter function after data is ready
+            _.searchItems(places);
+            ko.computed(function() {
+                var filter = _.searchWord().toLowerCase();
+                if (filter==="") {
+                    places.forEach(function(i){
+                        i.show();
                     });
                     _.searchItems(places);
-                });
-            }else{
-                request = {
-                    "action":"s",
-                    "name":_.searchWord(),
-                    "location": "San fransaco",
-                    "limit": 10
-                };
-                searchajax=searchPlace(request,function(data){
-                    places=data.businesses.map(function(i){
-                        return new place(i,map);
-                    });
-                    _.searchItems(places);
-                });
-            }
+                } else {
+                    _.searchItems(ko.utils.arrayFilter(places, function(item) {
+                        if(item.data.name.toLowerCase().indexOf(filter) >= 0){
+                            item.show();
+                            return true;
+                        }else{
+                            item.clear();
+                            return false;
+                        }
+                    }));
+                }
+            });
         });
+        
     }
 
     //bind with view

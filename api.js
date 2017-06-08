@@ -8,42 +8,42 @@ const client = yelp.client(access_token);
 
 function search(s){
 
-    if(typeof s.location!="undefined"&&s.location!=""){
+    if(typeof s.location!=="undefined"&&s.location!==""){
         return client.search(s);
     }else{
         return {"error":1};
     }
 }
 function searchPhone(s){
-    if(typeof s.phone!="undefined"&&s.phone!=""){
+    if(typeof s.phone!=="undefined"&&s.phone!==""){
         return client.phoneSearch({phone:s.phone});
     }else{
         return {"error":1};
     }
 }
 function searchTransaction(s){
-    if(typeof s.location!="undefined"&&s.location!=""){
+    if(typeof s.location!=="undefined"&&s.location!==""){
         return client.transactionSearch('delivery', {location:s.location});
     }else{
         return {"error":1};
     }
 }
 function autoComplete(s){
-    if(typeof s.text!="undefined"&&s.text!=""){
+    if(typeof s.text!=="undefined"&&s.text!==""){
         return client.autocomplete({text:s.text});
     }else{
         return {"error":1};
     }
 }   
 function searchBusiness(s){
-    if(typeof s.id!="undefined"&&s.id!=""){
+    if(typeof s.id!=="undefined"&&s.id!==""){
         return client.business(s.id);
     }else{
         return {"error":1};
     }
 }
-function searchReview(searchRequest){
-    if(typeof s.id!="undefined"&&s.id!=""){
+function searchReview(s){
+    if(typeof s.id!=="undefined"&&s.id!==""){
         return client.reviews(s.id);
     }else{
         return {"error":1};
@@ -89,7 +89,7 @@ function onrequest(request, response){
                break;
         }
         
-        response.writeHead(200,{"Content-Type":"application/json","Access-Control-Allow-Origin":"http://localhost:88"});
+        response.writeHead(200,{"Content-Type":"application/json","Access-Control-Allow-Origin":"http://localhost"});
 
         if(typeof r.error!=="undefined"&&r.error===1){
             prettyJson=JSON.stringify(r, null, 4)
@@ -109,5 +109,3 @@ function onrequest(request, response){
     });
 }
 http.createServer(onrequest).listen(8888);
-
-console.log("connect api");

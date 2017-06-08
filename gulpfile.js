@@ -6,12 +6,10 @@ var uglify = require('gulp-uglify');
 var minifyCss = require('gulp-minify-css');
 var htmlmin = require('gulp-htmlmin');
 
-
-
 gulp.task('connect', function() {
     require('./api.js');
     connect.server({
-        port:88,
+        port:80,
         root: ['src','bower_components'],
         livereload: true
     });
@@ -22,7 +20,7 @@ gulp.task('bower', function() {
 });
 
 gulp.task('check', function() {
-    return gulp.src(['./src/scripts/*.js','./dist/scripts/*.js'])
+    return gulp.src(['./src/scripts/*.js'])
     .pipe(jshint())
     .pipe(jshint.reporter('default'));
 });
@@ -42,9 +40,10 @@ gulp.task('zip',function(){
 })
 gulp.task('default', ["connect"]);
 gulp.task('serve',  function() {
-   connect.server({
-    port:80,
-    root: ['dist'],
-    livereload: true
-  });
+    require('./api.js');
+    connect.server({
+        port:80,
+        root: ['dist'],
+        livereload: true
+    });
 });
