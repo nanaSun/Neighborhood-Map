@@ -1,5 +1,5 @@
 var map,
-	centerPoint={lat: 35.0153,lng:135.7682},//initial center point
+	centerPoint={lat: 37.77493,lng: -122.41942},//initial center point
 	places=[],
 	infoWindow,
 	service,
@@ -10,7 +10,7 @@ function initMap() {
 	//init map
     map = new google.maps.Map(document.getElementById('map'), {
       center:centerPoint,
-      zoom:13,
+      zoom:10,
       zoomControl: true,
 	  mapTypeControl: false,
 	  scaleControl: true,
@@ -23,13 +23,6 @@ function initMap() {
     //init service
     service = new google.maps.places.PlacesService(map);
 
-    //search init params
-    request = {
-        location: map.getCenter(),
-        radius:'5000',
-        types: []
-    };
-
     //marker animation
     function markerBounce(marker) {
         marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -40,13 +33,7 @@ function initMap() {
 
     //place detail window
     function infoPanel(data){
-        
-        if(typeof data.photos!=="undefined"&&data.photos.length>0){
-            return '<img src="'+data.photos[0].getUrl({'maxWidth': 120})+'"/><br/>'+data.name+"<br/>"+data.formatted_address+"<br/>";}
-        else{
-            return data.name+"<br/>"+data.formatted_address+"<br/>";
-        }
-        
+            return data.name+"<br/>"+data.location.display_address.join(",")+"<br/>";
     }
 
     //each place function
@@ -55,47 +42,21 @@ function initMap() {
         _.data=data;
         _.marker = new google.maps.Marker({
             map: map,
-            position: data.geometry.location
+            position: new google.maps.LatLng(_.data.coordinates.latitude, _.data.coordinates.longitude)
         });
-
+        _.marker.setMap(map);
+        
+        console.log(_.marker);
         _.showDetail=function(){
-            map.setCenter(_.data.geometry.location);
+            map.setCenter(new google.maps.LatLng(_.data.coordinates.latitude, _.data.coordinates.longitude));
             map.setZoom(15);
             infoWindow.close();
-            service.getDetails(_.data, function(result, status) {
-                if (status !== google.maps.places.PlacesServiceStatus.OK) {
-                    console.error(status);
-                    return;
-                }
-                console.log(_.data);
-                infoWindow.setContent(infoPanel(_.data));
-                infoWindow.open(map, _.marker);
-            });
-
-            //https://www.yelp.com/developers/documentation/v3/business_reviews
-            //http://samples.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=b1b15e88fa797225412429c1c50c122a1
-            // $.ajax( {
-            //     url: "https://jp.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles="+_.data.name,
-            //     dataType: 'jsonp',
-            //     type: 'GET',
-            //     headers: { 'Api-User-Agent': 'Example/1.0' },
-            //     success: function(data) {
-            //        console.log();
-            //        for(var i in data.query.pages){
-            //             if(i==-1){
-                           
-            //             }else{
-            //                 infoWindow.setContent(infoPanel(data.query.pages[i].revisions[0]['*']));
-            //             }
-            //             break;
-            //        }
-            //     }
-            // } );
-            // infoWindow.setContent(infoPanel(_.data));
-            // infoWindow.open(map, _.marker);
+            console.log(_.data);
+            infoWindow.setContent(infoPanel(_.data));
+            infoWindow.open(map, _.marker);
         };
 
-         //show info with animation
+        //show info with animation
         _.clickMarkerDetail=function(){
             markerBounce(_.marker);
             _.showDetail();
@@ -109,30 +70,20 @@ function initMap() {
     }
 
     //search place service
-    function searchPlace(request,_,map){
-        service.textSearch(request, function(results, status){
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-                places=results.map(function(i,index){
-                    var tmp=new place(i,map);
-                    return tmp;
-                });
-                _.searchItems(places);
-            }else{
-                _.searchItems([]);
-            }
-        });
-    }
-    //search place service
-    function searchNearByPlace(request,_,map){
-        service.nearbySearch(request, function(results, status){
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-                places=results.map(function(i,index){
-                    var tmp=new place(i,map);
-                    return tmp;
-                });
-                _.searchItems(places);
-            }else{
-                _.searchItems([]);
+    function searchPlace(request,callback){
+        return $.ajax({
+            url: "http://localhost:8888",
+            data:request,
+            type: 'POST',
+            success: function(data) {
+                if("error" in data){
+                    alert("system error");
+                    return;
+                }
+                callback(data);
+            },
+            fail:function(data){
+                alert("system error");
             }
         });
     }
@@ -141,13 +92,22 @@ function initMap() {
     //main model function
     function MapViewModel() {
         var _=this;
+        var searchajax=null;
         //toggle menu function use true and false to control the menu style
         _.showMenu = ko.observable(true);
+        //toggle filter div
         _.showChooseType = ko.observable(false);
+        //filter item
         _.typeItems=ko.observableArray(["store","bar","bank","hospital","atm"]);
+        //search keyword
         _.searchWord= ko.observable("");
+
+        //after search items
         _.searchItems=ko.observableArray([]);
+
+        //init search type
         _.type=ko.observable("store");
+
         _.toggleMenu = function(){
             _.showMenu(!this.showMenu());
         };
@@ -158,6 +118,7 @@ function initMap() {
         	_.showChooseType(!this.showChooseType());
         };
         ko.computed(function(){
+            if(searchajax!==null) searchajax.abort();
             _.searchItems([]);
             places.forEach(function(i){
                 i.clear();
@@ -165,10 +126,30 @@ function initMap() {
             map.setCenter(centerPoint);
             map.setZoom(13);
             if(_.searchWord()==="") { 
-            	request.types=_.typeItems();searchNearByPlace(request,_,map);
+                request = {
+                    "action":"s",
+                    "location": "San fransaco",
+                    "limit": 10
+                };
+            	searchajax=searchPlace(request,function(data){
+                    places=data.businesses.map(function(i){
+                        return new place(i,map);
+                    });
+                    _.searchItems(places);
+                });
             }else{
-            	request.types=[_.type()];
-            	request.query=_.searchWord();searchPlace(request,_,map);
+                request = {
+                    "action":"s",
+                    "name":_.searchWord(),
+                    "location": "San fransaco",
+                    "limit": 10
+                };
+                searchajax=searchPlace(request,function(data){
+                    places=data.businesses.map(function(i){
+                        return new place(i,map);
+                    });
+                    _.searchItems(places);
+                });
             }
         });
     }
@@ -177,10 +158,3 @@ function initMap() {
     ko.applyBindings(new MapViewModel());
 }
 
-$.ajax( {
-    url: "http://localhost:8888",
-    type: 'GET',
-    success: function(data) {
-       console.log(data);
-    }
-});

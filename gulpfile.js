@@ -6,28 +6,12 @@ var uglify = require('gulp-uglify');
 var minifyCss = require('gulp-minify-css');
 var htmlmin = require('gulp-htmlmin');
 
-const http = require("http");
-const fs = require("fs");
-const yelp = require('yelp-fusion');
-//https://www.npmjs.com/package/yelp-fusion
-function onrequest(request, response){
-    const access_token="7Yj_PenZLmuck0zfPI6uJZELH7mXSfT_CicA4DpddzwwjBKhUNpD5weHrPEUzbmeSM1HAUtvkCgMnyryn6JyxcGGbfLX8forYwCuagbMwiU-SFl4O85T9IU2TAo4WXYx";
-    const searchRequest = {
-        id: "gary-danko-san-francisco"
-    };
-    response.writeHead(200,{"Content-Type":"application/json","Access-Control-Allow-Origin":"http://localhost"});
-    const client = yelp.client(access_token);
-            client.business("gary-danko-san-francisco").then(data => {
-            const prettyJson = JSON.stringify(data, null, 4);
-            response.write(prettyJson);
-             response.end();
-        });
-}
+
 
 gulp.task('connect', function() {
-    http.createServer(onrequest).listen(8888);
+    require('./api.js');
     connect.server({
-        port:80,
+        port:88,
         root: ['src','bower_components'],
         livereload: true
     });
