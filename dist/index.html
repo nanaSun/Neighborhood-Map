@@ -1,31 +1,35 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <title>Simple Map</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
- 	<link rel="stylesheet" href="/styles/style.css">
-  </head>
-  <body>
-      <nav data-bind="attr:{class: showMenu() ?'':'hide-menu'}">
-          <section>
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+
+<body>
+    <nav data-bind="attr:{class: showMenu() ?'':'hide-menu'}">
+        <section>
             <h1>BART Locations</h1>
             <div class="search-box">
-        	       <div><input data-bind="textInput: searchWord" placeholder="Station Locations" /></div>
-        	       <div id="filter">Filter</div>
+                <div>
+                    <input data-bind="textInput: searchWord" placeholder="Station Locations" />
+                </div>
+                <div id="filter">Filter</div>
             </div>
             <div class="list-box">
                 <div class="search-list" data-bind="foreach: searchItems ">
-                  <div class="item-list" data-bind="click: $data.clickMarkerDetail,text: $data.data.name"></div>
+                    <div class="item-list" data-bind="click: $data.clickMarkerDetail,text: $data.data.name"></div>
                 </div>
             </div>
         </section>
         <div id="toggle-menu" data-bind="click: toggleMenu"></div>
     </nav>
-    <div id="map"></div>
-	<script src="/scripts/tool.min.js"></script>
- 	<script src="/scripts/app.js"></script>
- 	<script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&libraries=places&key="
-    async defer onerror="alert('init fail')"></script>
-  </body>
+    <main id="map"></main>
+    <script src="/scripts/tool.min.js"></script>
+    <script src="/scripts/app.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap&libraries=places&key=" async defer onerror="alert('init fail')"></script>
+</body>
+
 </html>
